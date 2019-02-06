@@ -1,6 +1,5 @@
 import os
 from player import *
-#from mcts_pure import *
 
 class Board:
 	
@@ -13,8 +12,6 @@ class Board:
 		self.last_put = -1
 		self.availables = list (range (self.w * self.h))
 		
-		self.current_player = 0 # delete
-		
 	def idx2loc (self, idx):
 		return idx // self.w, idx % self.h
 		
@@ -25,33 +22,28 @@ class Board:
 		self.board[idx] = player_id
 		self.availables.remove (idx)
 		self.last_put = idx
-		
-	def do_move (self, idx):
-		self.board[idx] = self.current_player
-		self.availables.remove (idx)
-		self.current_player ^= 1 # delete
-	
-	def get_current_player (self):
-		return self.current_player
 	
 	'''
 	计算与idx同色的连续长度
-	direction: 0表示按行，1表示按列，2表示斜着
+	direction: 0表示按行，1表示按列，2表示左上到右下斜着，3表示左下到右上斜着
 	side: -1表示计算idx的左边（上面），1表示计算idx的右边（下面）
 	'''
 	def max_continue (self, direction, side, idx):
 		x, y = self.idx2loc (idx)
 		player_id = self.board[idx]
 		
+		x_delta = {0:0, 1:side, 2:side, 3:-side}
+		y_delta = {0:side, 1:0, 2:side, 3:side}
+		
 		s = 0
-		i = x + side if direction == 1 or direction == 2 else x
-		j = y + side if direction == 0 or direction == 2 else y
+		i = x + x_delta[direction]
+		j = y + y_delta[direction]
 		while (i >= 0 and i < self.h and i > x - 5 and i < x + 5
 				and j >= 0 and j < self.w and j > y - 5 and j < y + 5
 				and self.board[self.loc2idx(i, j)] == player_id):
 			s += 1
-			i += side if direction == 1 or direction == 2 else 0
-			j += side if direction == 0 or direction == 2 else 0
+			i += x_delta[direction]
+			j += y_delta[direction]
 		
 		return s
 	
@@ -66,7 +58,10 @@ class Board:
 				self.max_continue (1, 1, self.last_put) + 1 >= 5: # 按列检查
 				return True, self.board[self.last_put]
 			elif self.max_continue (2, -1, self.last_put) + \
-				self.max_continue (2, 1, self.last_put) + 1 >= 5: # 斜着检查
+				self.max_continue (2, 1, self.last_put) + 1 >= 5: # 左上右下
+				return True, self.board[self.last_put]
+			elif self.max_continue (3, -1, self.last_put) + \
+				self.max_continue (3, 1, self.last_put) + 1 >= 5: # 左下右上
 				return True, self.board[self.last_put]
 			elif len (self.availables) == 0: # 棋盘摆满，不分胜负
 				return True, -1
@@ -113,6 +108,7 @@ class Game:
 			idx = players[self.current_player_id].gen_action (self.board)
 			self.put (idx)
 			if is_show:
+				loc = self.board.idx2loc (idx)
 				self.board.print_board ()
 			
 			is_over, winner = self.board.is_game_over ()
@@ -124,14 +120,11 @@ class Game:
 				return winner
 
 if __name__ == '__main__':
-	board = Board (6, 6)
+	board = Board (7, 7)
 	board.init_board ()
 
 	game = Game (board)
 	game.init_game ()
 
-#	players = [HumanPlayer(0), MCTSPlayer()]
-#	players[1].set_player_ind (1)
-	
 	players = [HumanPlayer(0), AiPlayer(1)]
 	game.start (players)

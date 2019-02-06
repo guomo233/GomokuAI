@@ -1,24 +1,28 @@
 from mcts import *
 from game import *
 import copy
+import abc
 
-class Player:
+class Player (metaclass = abc.ABCMeta):
 	
 		def __init__(self, player_id):
 			self.player_id = player_id
 		
+		@abc.abstractmethod
 		def gen_action (self, board):
 			pass
 			
 class HumanPlayer (Player):
-
+	
 	def gen_action (self, board):
-		action = input ("put: ")
+		action = input (f'Player {self.player_id} put: ')
 		
-		loc = [int(i.strip()) for i in action.split(',')]
-		idx = board.loc2idx (*loc)
-		
-		if -1 != board.board[idx]:
+		try:
+			loc = [int(i.strip()) for i in action.split(',')]
+			idx = board.loc2idx (*loc)
+			if -1 != board.board[idx]:
+				raise RuntimeError ()
+		except:
 			print ('invalid put')
 			idx = self.gen_action (board)
 			
@@ -26,15 +30,13 @@ class HumanPlayer (Player):
 
 class AiPlayer (Player):
 	
-	def __init__(self, player_id, c_puct = 1, n_search = 2000):
+	def __init__(self, player_id, c_puct = 5, n_search = 2000):
 		self.mcts = MCTS (c_puct)
 		self.n_search = n_search
 		super (AiPlayer, self).__init__ (player_id)
 	
-	def gen_action (self, board):
-		
-		if board.last_put != -1:
-			self.mcts.rebuild (board.last_put)
+	def gen_action (self, board, is_show = 1):
+		self.mcts.rebuild (board.last_put)
 		
 		if len (board.availables) == 1:
 			return board.availables[0]
@@ -47,5 +49,9 @@ class AiPlayer (Player):
 		
 		action = self.mcts.best_action ()
 		self.mcts.rebuild (action)
+		
+		if is_show:
+			loc = board.idx2loc (action)
+			print (f'Player {self.player_id} put: {loc[0]},{loc[1]}')
 
 		return action
