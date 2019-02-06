@@ -30,7 +30,7 @@ class HumanPlayer (Player):
 
 class AiPlayer (Player):
 	
-	def __init__(self, player_id, c_puct = 5, n_search = 2000):
+	def __init__(self, player_id, c_puct = 5, n_search = 700):
 		self.mcts = MCTS (c_puct)
 		self.n_search = n_search
 		super (AiPlayer, self).__init__ (player_id)
