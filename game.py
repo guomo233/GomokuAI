@@ -67,9 +67,6 @@ class Board:
 				return True, -1
 			else:
 				return False, -1
-				
-	def game_end (self):
-		return self.is_game_over ()
 
 	def print_board (self):
 		print ('Player 0 with x\nPlayer 1 with o\n')
