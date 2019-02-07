@@ -1,12 +1,16 @@
-from mcts import *
-from game import *
 import copy
 import abc
+from mcts import *
+from game import *
 
 class Player (metaclass = abc.ABCMeta):
 	
-		def __init__(self, player_id):
+		def __init__ (self, player_id):
 			self.player_id = player_id
+		
+		@abc.abstractmethod
+		def __str__ (self):
+			pass
 		
 		@abc.abstractmethod
 		def gen_action (self, board):
@@ -14,6 +18,9 @@ class Player (metaclass = abc.ABCMeta):
 			
 class HumanPlayer (Player):
 	
+	def __str__ (self):
+		return f'HumanPlayer{self.player_id}'
+		
 	def gen_action (self, board):
 		action = input (f'Player {self.player_id} put: ')
 		
@@ -30,7 +37,10 @@ class HumanPlayer (Player):
 
 class AiPlayer (Player):
 	
-	def __init__(self, player_id, c_puct = 5, n_search = 700):
+	def __str__ (self):
+		return f'AiPlayer{self.player_id}'
+	
+	def __init__(self, player_id, c_puct = 5, n_search = 1300):
 		self.mcts = MCTS (c_puct)
 		self.n_search = n_search
 		super (AiPlayer, self).__init__ (player_id)

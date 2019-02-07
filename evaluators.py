@@ -36,7 +36,7 @@ class MCEvaluator (Evaluator):
 		current_player_id = game.current_player_id
 		
 		while True:
-			is_over, winner = game.board.is_game_over ()
+			is_over, winner = game.is_game_over ()
 			if is_over:
 				break
 			

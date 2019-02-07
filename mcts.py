@@ -73,7 +73,7 @@ class MCTS:
 		for action in actions:
 			game.put (action)
 		
-		is_over, winner = game.board.is_game_over ()
+		is_over, winner = game.is_game_over ()
 		if not is_over:
 			actions = evaluator.policy (game)
 			node.expand (actions)
