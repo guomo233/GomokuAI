@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 import numpy as np
 from game import *
 from player import *
@@ -12,15 +13,16 @@ class GUI:
 	def __init__(self, game):
 		self.game = game
 		self.root = tk.Tk ()
-	
-	def show (self, title = 'Gomoku'):
+		
+	def show (self, title = 'Gomoku', board_size = 540, board_blank = 75):
 		self.root.title (title)
-		self.board_canvas = GUI.Board (self, 540, 75, 0, 0, 4)
+		self.board_canvas = GUI.Board (self, board_size, board_blank, 0, 0, 5)
 		self.player_hint = GUI.PlayerHint (self, 100, 0, 1)
 		self.result_hint = GUI.ResultHint (self, 2, 1)
-
+		self.ai_level_choice = GUI.AiLevelChoice (self, 3, 1)
+		
 		reset_button = tk.Button (self.root, text = 'Restart', font = 20, command = self.reset)
-		reset_button.grid (row = 3, column = 1)
+		reset_button.grid (row = 4, column = 1)
 		
 		self.root.mainloop ()
 		
@@ -57,7 +59,7 @@ class GUI:
 
 			self.update (0)
 			
-		def update (self, player):
+		def update (self, player_id):
 			# 更新棋子
 			self.canvas.delete ('color_hint')
 			
@@ -65,10 +67,10 @@ class GUI:
 			oval_y = self.hint_size + 10
 			self.canvas.create_oval (oval_x - self.hint_size, oval_y - self.hint_size,
 						oval_x + self.hint_size, oval_y + self.hint_size,
-						fill = self.color_str[player], tags = ('color_hint'))
+						fill = self.color_str[player_id], tags = ('color_hint'))
 			
 			# 更新选手			
-			self.player_var.set (self.players_str[player])
+			self.player_var.set (self.players_str[player_id])
 			
 			self.root.update ()
 	
@@ -120,20 +122,24 @@ class GUI:
 			
 		def click (self, event):
 			if not self.is_over and game.current_player_id == 0:
+				# 获取当前点击的棋盘位置
 				x = int (np.round ((event.y - self.canvas_loc[1]) / self.interval))
 				y = int (np.round ((event.x - self.canvas_loc[0]) / self.interval))
 				
+				# 如果可以落子则落子
 				idx = self.game.board.loc2idx (x, y)
 				if self.game.board.board[idx] == -1:
 					self.put ((x, y), self.game.current_player_id)
 					self.game.put (idx)
 					self.parent.player_hint.update (self.game.current_player_id)
 					
+					# 判断游戏结束
 					self.is_over, winner = self.game.is_game_over ()
 					if self.is_over:
 						self.parent.result_hint.update (winner)
 						return
 					
+					# AI落子
 					action = self.parent.ai_player.gen_action (game.board, is_show = 0)
 					x, y = game.board.idx2loc (action)
 					self.put ((x, y), self.game.current_player_id)
@@ -187,6 +193,29 @@ class GUI:
 			
 			self.var.set (result)
 
+	class AiLevelChoice:
+		
+		def __init__(self, parent, row, column, default = 3):
+			self.root = parent.root
+			self.parent = parent
+			
+			# 提示文本
+			label = tk.Label (self.root, text = 'AI Level\n\n\n')
+			label.grid (row = row, column = column)
+			
+			# 设置下拉框
+			self.comboxlist = ttk.Combobox (self.root, width = 6, state = 'readonly')
+			self.comboxlist['values'] = ('1', '2', '3', '4', '5')
+			self.comboxlist.grid (row = row, column = column)
+
+			self.comboxlist.current (default - 1)
+
+			self.comboxlist.bind ('<<ComboboxSelected>>', self.choice)
+			
+		def choice (self, event):
+			level = int (self.comboxlist.get ())
+			self.parent.ai_player.set_level (level)
+			
 if __name__ == '__main__':
 	board = Board (7)
 	board.init_board ()

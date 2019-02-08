@@ -40,10 +40,13 @@ class AiPlayer (Player):
 	def __str__ (self):
 		return f'AiPlayer{self.player_id}'
 	
-	def __init__(self, player_id, c_puct = 5, n_search = 1300):
+	def __init__(self, player_id, c_puct = 5, level = 3):
 		self.mcts = MCTS (c_puct)
-		self.n_search = n_search
+		self.set_level (level)
 		super (AiPlayer, self).__init__ (player_id)
+		
+	def set_level (self, level):
+		self.n_search = 400 * level
 	
 	def gen_action (self, board, is_show = 1):
 		self.mcts.rebuild (board.last_put)
