@@ -24,7 +24,7 @@ class GUI:
 		self.ai_level_choice = GUI.AiLevelChoice (self, 3, 1)
 		self.board_size_choice = GUI.BoardSizeChoice (self, 4, 1)
 		
-		reset_button = tk.Button (self.root, text = 'Restart', font = 20, command = self.reset)
+		reset_button = tk.Button (self.root, text = 'Restart', width = 8, font = 20, command = self.reset)
 		reset_button.grid (row = 5, column = 1)
 		
 		self.root.mainloop ()
