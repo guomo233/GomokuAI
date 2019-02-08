@@ -3,7 +3,6 @@ from tkinter import ttk
 import numpy as np
 from game import *
 from player import *
-import time
 
 class GUI:
 	
@@ -15,14 +14,18 @@ class GUI:
 		self.root = tk.Tk ()
 		
 	def show (self, title = 'Gomoku', board_size = 540, board_blank = 75):
+		self.board_size = board_size
+		
 		self.root.title (title)
-		self.board_canvas = GUI.Board (self, board_size, board_blank, 0, 0, 5)
+		
+		self.board_canvas = GUI.Board (self, self.board_size, board_blank, 0, 0, 6)
 		self.player_hint = GUI.PlayerHint (self, 100, 0, 1)
 		self.result_hint = GUI.ResultHint (self, 2, 1)
 		self.ai_level_choice = GUI.AiLevelChoice (self, 3, 1)
+		self.board_size_choice = GUI.BoardSizeChoice (self, 4, 1)
 		
 		reset_button = tk.Button (self.root, text = 'Restart', font = 20, command = self.reset)
-		reset_button.grid (row = 4, column = 1)
+		reset_button.grid (row = 5, column = 1)
 		
 		self.root.mainloop ()
 		
@@ -82,7 +85,8 @@ class GUI:
 		def __init__(self, parent, size, blank_size, row, column, rowspan):
 			self.parent = parent
 			self.root = parent.root
-			self.game = parent.game
+			self.blank_size = blank_size
+			self.size = size
 			
 			# 绘制棋盘背景
 			self.canvas = tk.Canvas (self.root, bg = "saddlebrown", 
@@ -91,21 +95,30 @@ class GUI:
 			self.canvas.grid (row = row, column = column, rowspan = rowspan)
 			
 			# 绘制网格
-			grid_size  = size - blank_size
-			self.interval = grid_size / (game.board.size - 1)
-			self.canvas_loc = blank_size // 2, blank_size // 2
-			for i in range (game.board.size):
+			self.update_board ()
+			
+			# 绑定鼠标点击事件
+			self.canvas.bind ('<Button-1>', self.click)
+		
+		def update_board (self):
+			self.canvas.delete ('grid')
+			
+			# 绘制网格
+			grid_size  = self.size - self.blank_size
+			self.interval = grid_size / (self.parent.game.board.size - 1)
+			self.canvas_loc = self.blank_size // 2, self.blank_size // 2
+			for i in range (self.parent.game.board.size):
 				self.canvas.create_line (self.canvas_loc[0], 
 										(self.interval * i + self.canvas_loc[1]), 
 										self.canvas_loc[0] + grid_size, 
-										(self.interval * i + self.canvas_loc[1]))
+										(self.interval * i + self.canvas_loc[1]), tags = 'grid')
 				self.canvas.create_line ((self.interval * i + self.canvas_loc[0]), 
 										self.canvas_loc[1], 
 										(self.interval * i + self.canvas_loc[0]), 
-										self.canvas_loc[1] + grid_size)
+										self.canvas_loc[1] + grid_size, tags = 'grid')
 
 			# 绘制坐标
-			for i in range (game.board.size):
+			for i in range (self.parent.game.board.size):
 				label_x = tk.Label (self.canvas, text = str(i), 
 									fg = "black", bg = "saddlebrown", 
 									width = 2)
@@ -116,41 +129,38 @@ class GUI:
 								y = self.interval * i + self.canvas_loc[1] - 10)
 				label_y.place (x = self.interval * i + self.canvas_loc[0] - 15, 
 								y = self.canvas_loc[0] - 27)
-			
-			# 绑定鼠标点击事件
-			self.canvas.bind ('<Button-1>', self.click)
-			
+		
 		def click (self, event):
-			if not self.is_over and game.current_player_id == 0:
+			if not self.is_over and self.parent.game.current_player_id == 0:
 				# 获取当前点击的棋盘位置
 				x = int (np.round ((event.y - self.canvas_loc[1]) / self.interval))
 				y = int (np.round ((event.x - self.canvas_loc[0]) / self.interval))
 				
 				# 如果可以落子则落子
-				idx = self.game.board.loc2idx (x, y)
-				if self.game.board.board[idx] == -1:
-					self.put ((x, y), self.game.current_player_id)
-					self.game.put (idx)
-					self.parent.player_hint.update (self.game.current_player_id)
+				idx = self.parent.game.board.loc2idx (x, y)
+				if self.parent.game.board.board[idx] == -1:
+					self.put ((x, y), self.parent.game.current_player_id)
+					self.parent.game.put (idx)
+					self.parent.player_hint.update (self.parent.game.current_player_id)
 					
 					# 判断游戏结束
-					self.is_over, winner = self.game.is_game_over ()
+					self.is_over, winner = self.parent.game.is_game_over ()
 					if self.is_over:
 						self.parent.result_hint.update (winner)
 						return
 					
 					# AI落子
-					action = self.parent.ai_player.gen_action (game.board, is_show = 0)
-					x, y = game.board.idx2loc (action)
-					self.put ((x, y), self.game.current_player_id)
-					self.game.put (action)
-					self.parent.player_hint.update (self.game.current_player_id)
+					action = self.parent.ai_player.gen_action (self.parent.game.board, is_show = 0)
+					x, y = self.parent.game.board.idx2loc (action)
+					self.put ((x, y), self.parent.game.current_player_id)
+					self.parent.game.put (action)
+					self.parent.player_hint.update (self.parent.game.current_player_id)
 					
-					self.is_over, winner = self.game.is_game_over ()
+					self.is_over, winner = self.parent.game.is_game_over ()
 					if self.is_over:
 						self.parent.result_hint.update (winner)
 						return
-			
+					
 		def point2loc (self, point):
 			x = self.interval * point[0] + self.canvas_loc[0]
 			y = self.interval * point[1] + self.canvas_loc[1]
@@ -195,7 +205,7 @@ class GUI:
 
 	class AiLevelChoice:
 		
-		def __init__(self, parent, row, column, default = 3):
+		def __init__(self, parent, row, column, default = 3, min_level = 1, max_level = 5):
 			self.root = parent.root
 			self.parent = parent
 			
@@ -205,7 +215,7 @@ class GUI:
 			
 			# 设置下拉框
 			self.comboxlist = ttk.Combobox (self.root, width = 6, state = 'readonly')
-			self.comboxlist['values'] = ('1', '2', '3', '4', '5')
+			self.comboxlist['values'] = ([str(i) for i in range (min_level, max_level + 1)])
 			self.comboxlist.grid (row = row, column = column)
 
 			self.comboxlist.current (default - 1)
@@ -215,6 +225,34 @@ class GUI:
 		def choice (self, event):
 			level = int (self.comboxlist.get ())
 			self.parent.ai_player.set_level (level)
+			
+	class BoardSizeChoice:
+		
+		def __init__(self, parent, row, column, default = 7, min_size = 5, max_size = 15):
+			self.parent = parent
+			self.root = parent.root
+			
+			# 提示文本
+			label = tk.Label (self.root, text = 'Board Size\n\n\n')
+			label.grid (row = row, column = column)
+			
+			# 设置下拉框
+			self.comboxlist = ttk.Combobox (self.root, width = 6, state = 'readonly')
+			self.comboxlist['values'] = ([str(i) for i in range (min_size, max_size + 1)])
+			self.comboxlist.grid (row = row, column = column)
+
+			self.comboxlist.current (default - min_size)
+
+			self.comboxlist.bind ('<<ComboboxSelected>>', self.choice)
+			
+		def choice (self, event):
+			size = int (self.comboxlist.get ())
+			board = Board (size)
+			self.parent.game = Game (board)
+			self.parent.reset ()
+			self.parent.ai_player.init_ai ()
+			
+			self.parent.board_canvas.update_board ()
 			
 if __name__ == '__main__':
 	board = Board (7)
