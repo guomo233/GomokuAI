@@ -51,7 +51,7 @@ class GUI:
 			self.hint_size = hint_size
 			
 			# 棋子
-			self.canvas = tk.Canvas (self.root, width = size)
+			self.canvas = tk.Canvas (self.root, width = size, height = hint_size * 2 + 10)
 			self.canvas.grid (row = row, column = column)
 			
 			# 选手

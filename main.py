@@ -20,11 +20,7 @@ def start (game, players, is_show = 1):
 			
 			return winner
 
-board = Board (7)
-board.init_board ()
-
-game = Game (board)
-game.init_game ()
+game = Game (Board (7))
 
 players = [HumanPlayer(0), AiPlayer(1)]
 start (game, players)
