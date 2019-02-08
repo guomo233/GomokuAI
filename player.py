@@ -43,11 +43,10 @@ class AiPlayer (Player):
 	def __init__(self, player_id, c_puct = 5, level = 3):
 		self.mcts = MCTS (c_puct)
 		self.set_level (level)
-		self.init_ai (c_puct)
 		super (AiPlayer, self).__init__ (player_id)
 	
-	def init_ai (self, c_puct = 5):
-		self.mcts = MCTS (c_puct)
+	def init_ai (self):
+		self.mcts.rebuild ()
 	
 	def set_level (self, level):
 		self.n_search = 400 * level

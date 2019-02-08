@@ -2,6 +2,7 @@ class Board:
 	
 	def __init__ (self, size):
 		self.size = size
+		self.init_board ()
 		
 	def init_board (self):
 		self.board = [-1 for i in range (self.size * self.size)]
@@ -65,6 +66,7 @@ class Game:
 	
 	def __init__(self, board):
 		self.board = board
+		self.init_game ()
 	
 	def init_game (self, start_palyer_id = 0):
 		self.current_player_id = start_palyer_id

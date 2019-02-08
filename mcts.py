@@ -57,7 +57,7 @@ class MCTS:
 		if node.parent is not None:
 			self.update (node.parent, -R)
 	
-	def rebuild (self, last_put):
+	def rebuild (self, last_put = -1):
 		if last_put in self.root.childs:
 			self.root = self.root.childs[last_put]
 			self.root.parent = None

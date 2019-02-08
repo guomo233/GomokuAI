@@ -34,11 +34,10 @@ class GUI:
 
 		self.game.board.init_board ()
 		self.game.init_game ()
-
+		self.ai_player.init_ai ()
+		
 		self.board_canvas.clear ()
-		
 		self.result_hint.update ()
-		
 		self.player_hint.update (0)
 
 	class PlayerHint:
@@ -94,7 +93,7 @@ class GUI:
 								height = size)
 			self.canvas.grid (row = row, column = column, rowspan = rowspan)
 			
-			# 绘制网格
+			# 绘制棋盘
 			self.update_board ()
 			
 			# 绑定鼠标点击事件
@@ -118,17 +117,17 @@ class GUI:
 										self.canvas_loc[1] + grid_size, tags = 'grid')
 
 			# 绘制坐标
-			for i in range (self.parent.game.board.size):
-				label_x = tk.Label (self.canvas, text = str(i), 
-									fg = "black", bg = "saddlebrown", 
-									width = 2)
-				label_y = tk.Label (self.canvas, text = str(i), 
-									fg = "black", bg = "saddlebrown", 
-									width = 2)
-				label_x.place (x = self.canvas_loc[0] - 30, 
-								y = self.interval * i + self.canvas_loc[1] - 10)
-				label_y.place (x = self.interval * i + self.canvas_loc[0] - 15, 
-								y = self.canvas_loc[0] - 27)
+#			for i in range (self.parent.game.board.size):
+#				label_x = tk.Label (self.canvas, text = str(i), 
+#									fg = "black", bg = "saddlebrown", 
+#									width = 2)
+#				label_y = tk.Label (self.canvas, text = str(i), 
+#									fg = "black", bg = "saddlebrown", 
+#									width = 2)
+#				label_x.place (x = self.canvas_loc[0] - 30, 
+#								y = self.interval * i + self.canvas_loc[1] - 10)
+#				label_y.place (x = self.interval * i + self.canvas_loc[0] - 15, 
+#								y = self.canvas_loc[0] - 27)
 		
 		def click (self, event):
 			if not self.is_over and self.parent.game.current_player_id == 0:
@@ -247,19 +246,14 @@ class GUI:
 			
 		def choice (self, event):
 			size = int (self.comboxlist.get ())
-			board = Board (size)
-			self.parent.game = Game (board)
+			self.parent.game = Game (Board (size))
+			
 			self.parent.reset ()
-			self.parent.ai_player.init_ai ()
 			
 			self.parent.board_canvas.update_board ()
 			
 if __name__ == '__main__':
-	board = Board (7)
-	board.init_board ()
-
-	game = Game (board)
-	game.init_game ()
+	game = Game (Board (7))
 
 	gui = GUI (game)
 	gui.show ()
