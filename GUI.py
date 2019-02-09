@@ -204,7 +204,7 @@ class GUI:
 
 	class AiLevelChoice:
 		
-		def __init__(self, parent, row, column, default = 3, min_level = 1, max_level = 5):
+		def __init__(self, parent, row, column, default = 4, min_level = 1, max_level = 8):
 			self.root = parent.root
 			self.parent = parent
 			

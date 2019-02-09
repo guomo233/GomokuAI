@@ -20,7 +20,7 @@ def start (game, players, is_show = 1):
 			
 			return winner
 
-game = Game (Board (7))
+game = Game (Board (8))
 
 players = [HumanPlayer(0), AiPlayer(1)]
 start (game, players)
