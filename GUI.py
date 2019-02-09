@@ -19,7 +19,7 @@ class GUI:
 		self.root.title (title)
 		
 		self.board_canvas = GUI.Board (self, self.board_size, board_blank, 0, 0, 6)
-		self.player_hint = GUI.PlayerHint (self, 100, 0, 1)
+		self.player_hint = GUI.PlayerHint (self, 105, 0, 1)
 		self.result_hint = GUI.ResultHint (self, 2, 1)
 		self.ai_level_choice = GUI.AiLevelChoice (self, 3, 1)
 		self.board_size_choice = GUI.BoardSizeChoice (self, 4, 1)
