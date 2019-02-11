@@ -140,7 +140,6 @@ class GUI:
 				if self.parent.game.board.board[idx] == -1:
 					self.put ((x, y), self.parent.game.current_player_id)
 					self.parent.game.put (idx)
-					self.parent.player_hint.update (self.parent.game.current_player_id)
 					
 					# 判断游戏结束
 					self.is_over, winner = self.parent.game.is_game_over ()
@@ -148,17 +147,23 @@ class GUI:
 						self.parent.result_hint.update (winner)
 						return
 					
+					# 切换 Player 显示
+					self.parent.player_hint.update (self.parent.game.current_player_id)
+					
 					# AI落子
 					action = self.parent.ai_player.gen_action (self.parent.game.board, is_show = 0)
 					x, y = self.parent.game.board.idx2loc (action)
 					self.put ((x, y), self.parent.game.current_player_id)
 					self.parent.game.put (action)
-					self.parent.player_hint.update (self.parent.game.current_player_id)
 					
+					# 判断游戏结束
 					self.is_over, winner = self.parent.game.is_game_over ()
 					if self.is_over:
 						self.parent.result_hint.update (winner)
 						return
+					
+					# 切换 Player 显示
+					self.parent.player_hint.update (self.parent.game.current_player_id)
 					
 		def point2loc (self, point):
 			x = self.interval * point[0] + self.canvas_loc[0]
