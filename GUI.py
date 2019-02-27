@@ -6,7 +6,6 @@ from player import *
 
 class GUI:
 	
-	is_over = False
 	ai_player = AiPlayer (1)
 	
 	def __init__(self, game):
@@ -225,6 +224,9 @@ class GUI:
 			self.comboxlist.current (default - 1)
 
 			self.comboxlist.bind ('<<ComboboxSelected>>', self.choice)
+			
+			# 初始化等级
+			self.parent.ai_player.set_level (default)
 			
 		def choice (self, event):
 			level = int (self.comboxlist.get ())
